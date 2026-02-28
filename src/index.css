@@ -975,3 +975,87 @@ html, body, #root {
     padding: 12px 14px 14px;
   }
 }
+
+/* ============================================================
+   Editable Phase Chips (PhaseStrip)
+   ============================================================ */
+
+.phase-strip-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Editable chips get a pointer and a subtle hover */
+.phase-chip.editable {
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+.phase-chip.editable:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.22);
+}
+
+/* Chip in edit mode — highlighted */
+.phase-chip.editing {
+  background: color-mix(in srgb, var(--accent, #6366f1) 18%, transparent);
+  border-color: var(--accent, #6366f1);
+  cursor: default;
+}
+
+/* Wrapper keeps the "Xs" layout intact while input is open */
+.editing-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+/* Inline number input — inherits chip typography exactly */
+.phase-chip-input {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+  color: white;
+  font-size: 1rem;
+  font-weight: 300;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  padding: 0;
+  outline: none;
+  min-width: 1ch;
+  max-width: 4ch;
+  -moz-appearance: textfield;
+}
+.phase-chip-input::-webkit-inner-spin-button,
+.phase-chip-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.phase-chip-unit {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Customised duration shown in accent colour */
+.phase-chip-dur.customised {
+  color: var(--accent, white);
+  font-weight: 500;
+}
+
+/* Tiny reset link below the chips */
+.phase-strip-reset {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color var(--transition), background var(--transition);
+}
+.phase-strip-reset:hover {
+  color: white;
+  background: rgba(255,255,255,0.07);
+}

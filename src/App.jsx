@@ -2,16 +2,16 @@ import { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { techniques, backgrounds, sounds } from './data/techniques';
-import { useBreathing }          from './hooks/useBreathing';
-import { useAmbientSound }       from './hooks/useAmbientSound';
-import { useTechniqueSettings }  from './hooks/useTechniqueSettings';
+import { useBreathing }         from './hooks/useBreathing';
+import { useAmbientSound }      from './hooks/useAmbientSound';
+import { useTechniqueSettings } from './hooks/useTechniqueSettings';
 
 import { BreathingGuide }    from './components/BreathingGuide';
 import { TechniqueSelector } from './components/TechniqueSelector';
 import { SoundControl }      from './components/SoundControl';
 import { BackgroundPicker }  from './components/BackgroundPicker';
 import { SessionTimer }      from './components/SessionTimer';
-import { DurationEditor }    from './components/DurationEditor';
+import { PhaseStrip }        from './components/PhaseStrip';
 
 import './App.css';
 
@@ -28,18 +28,14 @@ export default function App() {
 
   const { play, stop, setVolume: setSoundVolume } = useAmbientSound();
 
-  // Custom timing settings (persisted to localStorage)
   const {
-    getDurations,
     getActiveTechnique,
     setDuration,
     resetDurations,
     isCustomised,
   } = useTechniqueSettings();
 
-  // The technique with custom durations baked in — used by everything downstream
   const activeTechnique = getActiveTechnique(technique);
-  const customDurations = getDurations(technique);
   const breathing       = useBreathing(activeTechnique);
 
   const handleSoundChange = useCallback((sound) => {
@@ -56,12 +52,6 @@ export default function App() {
   const handleTechniqueSelect = useCallback((t) => {
     setTechnique(t);
   }, []);
-
-  // Show the duration editor when idle and the technique supports it
-  const showDurationEditor =
-    !breathing.isRunning &&
-    breathing.cycleCount === 0 &&
-    technique.guideType !== 'guided';
 
   return (
     <div
@@ -113,19 +103,6 @@ export default function App() {
           )}
         </div>
 
-        {/* Duration editor — shown when idle, breathing techniques only */}
-        <AnimatePresence>
-          {showDurationEditor && (
-            <DurationEditor
-              technique={technique}
-              durations={customDurations}
-              onSetDuration={setDuration}
-              onReset={resetDurations}
-              isCustomised={isCustomised(technique)}
-            />
-          )}
-        </AnimatePresence>
-
         {/* Breathing / meditation visual */}
         <div className={`guide-container ${technique.guideType === 'guided' ? 'guide-container--guided' : ''}`}>
           <BreathingGuide
@@ -139,20 +116,19 @@ export default function App() {
           />
         </div>
 
-        {/* Phase strip — hidden for guided meditations */}
+        {/* Phase strip — inline-editable chips, hidden for guided meditations */}
         {technique.guideType !== 'guided' && (
-          <div className="phase-sequence">
-            {activeTechnique.phases.map((p, i) => (
-              <div
-                key={i}
-                className={`phase-chip ${i === breathing.phaseIndex && breathing.isRunning ? 'active' : ''}`}
-                style={{ '--accent': technique.color }}
-              >
-                <span className="phase-chip-label">{p.label}</span>
-                <span className="phase-chip-dur">{p.duration}s</span>
-              </div>
-            ))}
-          </div>
+          <PhaseStrip
+            technique={technique}
+            phases={activeTechnique.phases}
+            defaultPhases={technique.phases}
+            activeIndex={breathing.phaseIndex}
+            isRunning={breathing.isRunning}
+            hasStarted={breathing.hasStarted}
+            onSetDuration={setDuration}
+            onReset={resetDurations}
+            isCustomised={isCustomised(technique)}
+          />
         )}
 
         {/* Session stats — breathing techniques only */}
