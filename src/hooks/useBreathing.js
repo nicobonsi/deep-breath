@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  */
 export function useBreathing(technique) {
   const [isRunning,    setIsRunning]    = useState(false);
+  const [hasStarted,   setHasStarted]   = useState(false); // true after first Begin press
   const [phaseIndex,   setPhaseIndex]   = useState(0);
   const [countdown,    setCountdown]    = useState(0);
   const [cycleCount,   setCycleCount]   = useState(0);
@@ -21,6 +22,7 @@ export function useBreathing(technique) {
   const reset = useCallback(() => {
     clearInterval(tickRef.current);
     setIsRunning(false);
+    setHasStarted(false);
     setPhaseIndex(0);
     setCountdown(phases[0]?.duration ?? 0);
     setCycleCount(0);
@@ -36,6 +38,7 @@ export function useBreathing(technique) {
   const start = useCallback(() => {
     if (!phases.length) return;
     setIsRunning(true);
+    setHasStarted(true);
     setPhaseIndex(phaseRef.current);
     setCountdown(countRef.current || phases[phaseRef.current]?.duration);
     countRef.current = countRef.current || phases[phaseRef.current]?.duration;
@@ -83,6 +86,7 @@ export function useBreathing(technique) {
 
   return {
     isRunning,
+    hasStarted,
     phase: currentPhase,
     phaseIndex,
     countdown,

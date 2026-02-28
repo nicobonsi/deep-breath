@@ -337,6 +337,11 @@ html, body, #root {
   color: rgba(255,255,255,0.7);
   margin-top: 2px;
 }
+.box-idle-hint {
+  color: rgba(255,255,255,0.38);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
 
 /* --- Circle Guide --- */
 .circle-guide-wrapper {

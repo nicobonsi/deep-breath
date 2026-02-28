@@ -2,7 +2,7 @@ import { BoxGuide }         from './BoxGuide';
 import { CircleGuide }      from './CircleGuide';
 import { GuidedMeditation } from './GuidedMeditation';
 
-export function BreathingGuide({ technique, phase, phaseIndex, progress, countdown, isRunning }) {
+export function BreathingGuide({ technique, phase, phaseIndex, progress, countdown, isRunning, hasStarted }) {
   const color  = technique?.color  ?? '#6366f1';
   const phases = technique?.phases ?? [];
 
@@ -13,6 +13,9 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
         phase={phase}
         color={color}
         countdown={countdown}
+        isRunning={isRunning}
+        hasStarted={hasStarted}
+        progress={progress}
       />
     );
   }
@@ -37,6 +40,9 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
       phases={phases}
       color={color}
       countdown={countdown}
+      isRunning={isRunning}
+      hasStarted={hasStarted}
+      progress={progress}
     />
   );
 }
