@@ -1,33 +1,47 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 /**
  * Circle / orb breathing guide.
- * The circle expands on inhale, holds, contracts on exhale.
+ *
+ * Animation is driven entirely by framer-motion over the full phase duration.
+ * key={phaseIndex} remounts the animated element at each phase transition so
+ * framer-motion starts a fresh interpolation — completely independent of the
+ * 1-second countdown tick, giving perfectly smooth expansion and contraction.
  */
 
-const MIN_R = 60;
+const MIN_R = 58;
 const MAX_R = 110;
 
-function phaseToRadius(phase) {
-  if (!phase) return MIN_R;
-  const dir = phase.direction;
-  if (dir === 'expand')   return MAX_R;
-  if (dir === 'contract') return MIN_R;
-  if (dir === 'hold')     return MAX_R; // hold after inhale
-  return MIN_R;
+// Resolve the end radius for a given phase direction.
+function endR(direction) {
+  if (direction === 'expand')   return MAX_R;
+  if (direction === 'contract') return MIN_R;
+  return null; // 'hold' — inherits from previous phase
 }
 
-export function CircleGuide({ phase, progress, color, countdown }) {
-  const targetR = phaseToRadius(phase);
+// Walk backwards through phases to find the radius that a phase should start at.
+function startRadius(phases, phaseIndex) {
+  for (let i = phaseIndex - 1; i >= 0; i--) {
+    const r = endR(phases[i].direction);
+    if (r !== null) return r;
+  }
+  return MIN_R; // first phase, or no prior non-hold phase found
+}
 
-  // During transition, animate toward the target based on progress
-  const fromR = phase?.direction === 'expand' ? MIN_R : MAX_R;
-  const currentR = phase?.direction === 'hold'
-    ? targetR
-    : fromR + (targetR - fromR) * progress;
+// The radius this phase ends at (hold phases stay where they started).
+function targetRadius(phases, phaseIndex) {
+  const r = endR(phases[phaseIndex].direction);
+  if (r !== null) return r;
+  return startRadius(phases, phaseIndex); // hold: no change
+}
 
-  const isExpanding  = phase?.direction === 'expand';
-  const isContracting = phase?.direction === 'contract';
+export function CircleGuide({ phase, phaseIndex, phases, color, countdown }) {
+  const fromR = startRadius(phases, phaseIndex);
+  const toR   = targetRadius(phases, phaseIndex);
+  const dur   = phase?.duration ?? 4;
+
+  // Large when expanded for font sizing
+  const isLarge = toR >= MAX_R - 10 || fromR >= MAX_R - 10;
 
   return (
     <div className="circle-guide-wrapper">
@@ -37,76 +51,74 @@ export function CircleGuide({ phase, progress, color, countdown }) {
         viewBox="-130 -130 260 260"
         aria-label="Circle breathing guide"
       >
-        {/* Outer ring */}
-        <circle
-          r={MAX_R + 8}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth={2}
-        />
-        {/* Inner ring */}
-        <circle
-          r={MIN_R - 8}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth={2}
-        />
+        {/* Static guide rings */}
+        <circle r={MAX_R + 10} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={1.5} />
+        <circle r={MIN_R - 10} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={1.5} />
 
-        {/* Pulsing rings */}
-        {[1, 2, 3].map(i => (
+        {/* Decorative pulsing rings — independent of orb size */}
+        {[0, 1, 2].map(i => (
           <motion.circle
             key={i}
-            r={currentR}
+            cx={0} cy={0}
             fill="none"
             stroke={color}
             strokeWidth={1}
-            opacity={0.15 / i}
-            animate={{ r: currentR + i * 10, opacity: 0 }}
-            transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.4, ease: 'easeOut' }}
+            initial={{ r: 75, opacity: 0.25 - i * 0.07 }}
+            animate={{ r: 75 + (i + 1) * 22, opacity: 0 }}
+            transition={{
+              duration: 2.2,
+              repeat: Infinity,
+              delay: i * 0.65,
+              ease: 'easeOut',
+            }}
           />
         ))}
 
-        {/* Main breathing orb */}
+        {/* Main orb — smooth per-phase animation */}
         <motion.circle
-          r={currentR}
+          key={`orb-${phaseIndex}`}
+          cx={0}
+          cy={0}
           fill={color}
           opacity={0.85}
           filter="url(#circleGlow)"
-          animate={{ r: currentR }}
-          transition={{ ease: 'linear', duration: 0.8 }}
+          initial={{ r: fromR }}
+          animate={{ r: toR }}
+          transition={{
+            duration: dur,
+            ease: phase?.direction === 'hold' ? 'linear' : 'easeInOut',
+          }}
         />
 
         {/* Countdown */}
         <text
-          x={0}
-          y={-6}
+          x={0} y={-8}
           textAnchor="middle"
           dominantBaseline="middle"
           fill="white"
-          fontSize={currentR > 90 ? '36' : '28'}
-          fontWeight="300"
+          fontSize={isLarge ? '36' : '30'}
+          fontWeight="200"
           fontFamily="inherit"
-          style={{ transition: 'font-size 0.3s' }}
         >
           {countdown}
         </text>
 
+        {/* Phase label */}
         <text
-          x={0}
-          y={22}
+          x={0} y={20}
           textAnchor="middle"
           dominantBaseline="middle"
-          fill="rgba(255,255,255,0.8)"
-          fontSize="13"
+          fill="rgba(255,255,255,0.75)"
+          fontSize="12"
           fontFamily="inherit"
-          letterSpacing="1"
+          letterSpacing="1.5"
         >
           {phase?.label?.toUpperCase()}
         </text>
 
         <defs>
           <filter id="circleGlow" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="8" result="blur" />
+            <feGaussianBlur stdDeviation="10" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />

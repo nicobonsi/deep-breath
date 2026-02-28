@@ -3,16 +3,16 @@ import { CircleGuide }      from './CircleGuide';
 import { GuidedMeditation } from './GuidedMeditation';
 
 export function BreathingGuide({ technique, phase, phaseIndex, progress, countdown, isRunning }) {
-  const color = technique?.color ?? '#6366f1';
+  const color  = technique?.color  ?? '#6366f1';
+  const phases = technique?.phases ?? [];
 
   if (technique?.guideType === 'box') {
     return (
       <BoxGuide
         phaseIndex={phaseIndex}
-        progress={progress}
+        phase={phase}
         color={color}
         countdown={countdown}
-        phase={phase}
       />
     );
   }
@@ -33,7 +33,8 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
   return (
     <CircleGuide
       phase={phase}
-      progress={progress}
+      phaseIndex={phaseIndex}
+      phases={phases}
       color={color}
       countdown={countdown}
     />

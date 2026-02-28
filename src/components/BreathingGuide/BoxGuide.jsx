@@ -2,38 +2,38 @@ import { motion } from 'framer-motion';
 
 /**
  * Box Breathing visual guide.
- * A ball travels around a square: up → right → down → left.
- * Each side corresponds to one phase (inhale / hold / exhale / hold).
+ *
+ * The ball travels around a square: top → right → bottom → left.
+ * key={phaseIndex} remounts the ball at the exact start corner each phase,
+ * then framer-motion animates it to the end corner over the full phase duration —
+ * giving completely smooth, uninterrupted motion with zero 1-second stepping.
  */
 
-const SIZE   = 220;  // box size in px
-const BALL   = 18;   // ball diameter
-const CORNER = 20;   // corner rounding
+const SIZE   = 220;
+const BALL   = 18;
+const MARGIN = 22; // distance of ball centres from edge
 
-// Corner positions (centres of each corner)
+// Ball centre positions at each corner of the path
 const corners = [
-  { x: CORNER,        y: CORNER        }, // top-left     → start of inhale
-  { x: SIZE - CORNER, y: CORNER        }, // top-right    → start of first hold
-  { x: SIZE - CORNER, y: SIZE - CORNER }, // bottom-right → start of exhale
-  { x: CORNER,        y: SIZE - CORNER }, // bottom-left  → start of second hold
+  { x: MARGIN,        y: MARGIN        }, // top-left     — inhale starts here
+  { x: SIZE - MARGIN, y: MARGIN        }, // top-right    — first hold starts here
+  { x: SIZE - MARGIN, y: SIZE - MARGIN }, // bottom-right — exhale starts here
+  { x: MARGIN,        y: SIZE - MARGIN }, // bottom-left  — second hold starts here
 ];
 
-// Direction labels along each side
+// Labels centred on each side of the square
 const sideLabels = [
-  { label: 'Inhale',  x: SIZE / 2, y: 8,          anchor: 'middle' },
-  { label: 'Hold',    x: SIZE - 4, y: SIZE / 2,   anchor: 'end'    },
-  { label: 'Exhale',  x: SIZE / 2, y: SIZE - 2,   anchor: 'middle' },
-  { label: 'Hold',    x: 4,        y: SIZE / 2,   anchor: 'start'  },
+  { label: 'Inhale',  x: SIZE / 2,    y: 8,            anchor: 'middle' },
+  { label: 'Hold',    x: SIZE - 5,    y: SIZE / 2,     anchor: 'end'    },
+  { label: 'Exhale',  x: SIZE / 2,    y: SIZE - 3,     anchor: 'middle' },
+  { label: 'Hold',    x: 5,           y: SIZE / 2,     anchor: 'start'  },
 ];
 
-export function BoxGuide({ phaseIndex, progress, color, countdown, phase }) {
-  // Interpolate ball position between the start corner of this phase
-  // and the start corner of the NEXT phase.
-  const fromCorner = corners[phaseIndex % 4];
-  const toCorner   = corners[(phaseIndex + 1) % 4];
-
-  const bx = fromCorner.x + (toCorner.x - fromCorner.x) * progress - BALL / 2;
-  const by = fromCorner.y + (toCorner.y - fromCorner.y) * progress - BALL / 2;
+export function BoxGuide({ phaseIndex, phase, color, countdown }) {
+  const sideIndex  = phaseIndex % 4;
+  const fromCorner = corners[sideIndex];
+  const toCorner   = corners[(sideIndex + 1) % 4];
+  const dur        = phase?.duration ?? 4;
 
   return (
     <div className="breathing-box-wrapper">
@@ -43,18 +43,34 @@ export function BoxGuide({ phaseIndex, progress, color, countdown, phase }) {
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         className="breathing-box-svg"
         aria-label="Box breathing guide"
+        overflow="visible"
       >
-        {/* Track */}
+        {/* Track rectangle */}
         <rect
-          x={CORNER}
-          y={CORNER}
-          width={SIZE - CORNER * 2}
-          height={SIZE - CORNER * 2}
-          rx={8}
-          ry={8}
+          x={MARGIN}
+          y={MARGIN}
+          width={SIZE - MARGIN * 2}
+          height={SIZE - MARGIN * 2}
+          rx={6}
+          ry={6}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
+          stroke="rgba(255,255,255,0.18)"
+          strokeWidth={1.5}
+        />
+
+        {/* Progress highlight — the side currently active */}
+        <motion.line
+          key={`side-${sideIndex}`}
+          x1={fromCorner.x}
+          y1={fromCorner.y}
+          x2={fromCorner.x}
+          y2={fromCorner.y}
+          stroke={color}
           strokeWidth={2}
+          strokeLinecap="round"
+          opacity={0.6}
+          animate={{ x2: toCorner.x, y2: toCorner.y }}
+          transition={{ duration: dur, ease: 'linear' }}
         />
 
         {/* Side labels */}
@@ -65,30 +81,43 @@ export function BoxGuide({ phaseIndex, progress, color, countdown, phase }) {
             y={s.y}
             textAnchor={s.anchor}
             dominantBaseline="middle"
-            fill={i === phaseIndex % 4 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'}
+            fill={i === sideIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.25)'}
             fontSize="11"
             fontFamily="inherit"
-            style={{ transition: 'fill 0.4s' }}
+            style={{ transition: 'fill 0.5s' }}
           >
             {s.label}
           </text>
         ))}
 
-        {/* Ball */}
+        {/* Ball — remounts each phase and animates the full distance smoothly */}
         <motion.circle
-          cx={bx + BALL / 2}
-          cy={by + BALL / 2}
+          key={`ball-${phaseIndex}`}
+          cx={fromCorner.x}
+          cy={fromCorner.y}
           r={BALL / 2}
           fill={color}
-          filter="url(#glow)"
-          animate={{ cx: bx + BALL / 2, cy: by + BALL / 2 }}
-          transition={{ ease: 'linear', duration: 0.5 }}
+          filter="url(#boxGlow)"
+          initial={{ cx: fromCorner.x, cy: fromCorner.y }}
+          animate={{ cx: toCorner.x,   cy: toCorner.y   }}
+          transition={{ duration: dur, ease: 'linear' }}
         />
 
-        {/* Glow filter */}
+        {/* Corner dots */}
+        {corners.map((c, i) => (
+          <circle
+            key={i}
+            cx={c.x}
+            cy={c.y}
+            r={3}
+            fill={i === sideIndex ? color : 'rgba(255,255,255,0.2)'}
+            style={{ transition: 'fill 0.4s' }}
+          />
+        ))}
+
         <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+          <filter id="boxGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
