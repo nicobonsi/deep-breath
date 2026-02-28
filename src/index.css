@@ -820,3 +820,153 @@ html, body, #root {
     filter: blur(28px);
   }
 }
+
+/* ============================================================
+   Duration Editor
+   ============================================================ */
+
+.duration-editor {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(10, 10, 25, 0.72);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 14px 18px 16px;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dur-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dur-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.dur-reset-btn {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: color var(--transition), background var(--transition);
+}
+.dur-reset-btn:hover {
+  color: white;
+  background: rgba(255,255,255,0.08);
+}
+
+/* Grid of phase controls — 2 per row, wrapping */
+.dur-phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.dur-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dur-phase-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  padding-left: 2px;
+}
+
+.dur-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.dur-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+  font-weight: 300;
+  line-height: 1;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background var(--transition);
+  flex-shrink: 0;
+  touch-action: none; /* prevents scroll on long-press mobile */
+  user-select: none;
+}
+.dur-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+.dur-btn:active:not(:disabled) { background: rgba(255,255,255,0.18); }
+.dur-btn:disabled { opacity: 0.25; cursor: default; }
+
+.dur-value-wrap {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+
+.dur-value {
+  font-size: 1.15rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: white;
+  line-height: 1;
+  transition: color 0.2s;
+  min-width: 22px;
+  text-align: right;
+}
+
+.dur-unit {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.dur-default-hint {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  margin-left: 2px;
+  opacity: 0.7;
+}
+
+/* Customised badge on the technique selector button */
+.technique-custom-badge {
+  font-size: 0.55rem;
+  vertical-align: super;
+  opacity: 0.7;
+  margin-left: -2px;
+}
+
+/* Responsive: single column on very small screens */
+@media (max-width: 399px) {
+  .dur-phases {
+    grid-template-columns: 1fr 1fr;
+  }
+  .duration-editor {
+    padding: 12px 14px 14px;
+  }
+}

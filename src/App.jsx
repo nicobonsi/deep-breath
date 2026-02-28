@@ -2,20 +2,22 @@ import { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { techniques, backgrounds, sounds } from './data/techniques';
-import { useBreathing }    from './hooks/useBreathing';
-import { useAmbientSound } from './hooks/useAmbientSound';
+import { useBreathing }          from './hooks/useBreathing';
+import { useAmbientSound }       from './hooks/useAmbientSound';
+import { useTechniqueSettings }  from './hooks/useTechniqueSettings';
 
 import { BreathingGuide }    from './components/BreathingGuide';
 import { TechniqueSelector } from './components/TechniqueSelector';
 import { SoundControl }      from './components/SoundControl';
 import { BackgroundPicker }  from './components/BackgroundPicker';
 import { SessionTimer }      from './components/SessionTimer';
+import { DurationEditor }    from './components/DurationEditor';
 
 import './App.css';
 
 const DEFAULT_TECHNIQUE  = techniques[0];
 const DEFAULT_BACKGROUND = backgrounds[0];
-const DEFAULT_SOUND      = sounds[0]; // silence
+const DEFAULT_SOUND      = sounds[0];
 
 export default function App() {
   const [technique,    setTechnique]    = useState(DEFAULT_TECHNIQUE);
@@ -25,15 +27,25 @@ export default function App() {
   const [showSelector, setShowSelector] = useState(false);
 
   const { play, stop, setVolume: setSoundVolume } = useAmbientSound();
-  const breathing = useBreathing(technique);
+
+  // Custom timing settings (persisted to localStorage)
+  const {
+    getDurations,
+    getActiveTechnique,
+    setDuration,
+    resetDurations,
+    isCustomised,
+  } = useTechniqueSettings();
+
+  // The technique with custom durations baked in — used by everything downstream
+  const activeTechnique = getActiveTechnique(technique);
+  const customDurations = getDurations(technique);
+  const breathing       = useBreathing(activeTechnique);
 
   const handleSoundChange = useCallback((sound) => {
     setActiveSound(sound);
-    if (sound.type === 'none') {
-      stop();
-    } else {
-      play(sound, volume);
-    }
+    if (sound.type === 'none') stop();
+    else play(sound, volume);
   }, [play, stop, volume]);
 
   const handleVolumeChange = useCallback((v) => {
@@ -44,6 +56,12 @@ export default function App() {
   const handleTechniqueSelect = useCallback((t) => {
     setTechnique(t);
   }, []);
+
+  // Show the duration editor when idle and the technique supports it
+  const showDurationEditor =
+    !breathing.isRunning &&
+    breathing.cycleCount === 0 &&
+    technique.guideType !== 'guided';
 
   return (
     <div
@@ -61,7 +79,6 @@ export default function App() {
           <span className="logo-icon">🌬️</span>
           <span className="logo-text">Deep Breath</span>
         </div>
-
         <div className="header-controls">
           <BackgroundPicker active={background} onSelect={setBackground} />
           <SoundControl
@@ -75,6 +92,7 @@ export default function App() {
 
       {/* Main */}
       <main className="app-main">
+
         {/* Technique picker button */}
         <div className="technique-header">
           <button
@@ -84,6 +102,9 @@ export default function App() {
           >
             <span className="technique-dot-sm" style={{ background: technique.color }} />
             {technique.name}
+            {isCustomised(technique) && (
+              <span className="technique-custom-badge" title="Timing customised">✦</span>
+            )}
             <span className="chevron">▾</span>
           </button>
 
@@ -92,10 +113,23 @@ export default function App() {
           )}
         </div>
 
+        {/* Duration editor — shown when idle, breathing techniques only */}
+        <AnimatePresence>
+          {showDurationEditor && (
+            <DurationEditor
+              technique={technique}
+              durations={customDurations}
+              onSetDuration={setDuration}
+              onReset={resetDurations}
+              isCustomised={isCustomised(technique)}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Breathing / meditation visual */}
         <div className={`guide-container ${technique.guideType === 'guided' ? 'guide-container--guided' : ''}`}>
           <BreathingGuide
-            technique={technique}
+            technique={activeTechnique}
             phase={breathing.phase}
             phaseIndex={breathing.phaseIndex}
             progress={breathing.progress}
@@ -104,10 +138,10 @@ export default function App() {
           />
         </div>
 
-        {/* Phase strip — hidden for guided meditations (the component handles its own progress) */}
+        {/* Phase strip — hidden for guided meditations */}
         {technique.guideType !== 'guided' && (
           <div className="phase-sequence">
-            {technique.phases.map((p, i) => (
+            {activeTechnique.phases.map((p, i) => (
               <div
                 key={i}
                 className={`phase-chip ${i === breathing.phaseIndex && breathing.isRunning ? 'active' : ''}`}
@@ -120,7 +154,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Session stats — only for breathing techniques */}
+        {/* Session stats — breathing techniques only */}
         <AnimatePresence>
           {technique.guideType !== 'guided' && (breathing.isRunning || breathing.cycleCount > 0) && (
             <motion.div
@@ -131,7 +165,7 @@ export default function App() {
               <SessionTimer
                 totalTime={breathing.totalTime}
                 cycleCount={breathing.cycleCount}
-                technique={technique}
+                technique={activeTechnique}
               />
             </motion.div>
           )}
@@ -160,7 +194,7 @@ export default function App() {
           )}
         </div>
 
-        {/* Description (only when idle) */}
+        {/* Description — idle only */}
         <AnimatePresence mode="wait">
           {!breathing.isRunning && (
             <motion.p
@@ -174,6 +208,7 @@ export default function App() {
             </motion.p>
           )}
         </AnimatePresence>
+
       </main>
 
       {/* Technique selector overlay */}
