@@ -55,7 +55,7 @@ export function useElevenLabs() {
             voice_settings: {
               stability:        0.75,
               similarity_boost: 0.75,
-              speed:            1.0,
+              speed:            0.8,
               style:            0.15,
               use_speaker_boost: true,
             },
