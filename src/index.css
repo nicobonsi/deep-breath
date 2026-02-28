@@ -1,0 +1,663 @@
+/* ============================================================
+   Deep Breath – Global Reset & Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+  --glass-bg: rgba(10, 10, 20, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.92);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.25s ease;
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* prevent scroll on desktop; main scrolls */
+}
+
+/* ============================================================
+   App Root – full-screen background
+   ============================================================ */
+.app-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  transition: background-image 0.8s ease;
+  overflow: hidden;
+}
+
+/* Dark overlay for readability over photos */
+.app-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.45) 0%,
+    rgba(0,0,0,0.2)  40%,
+    rgba(0,0,0,0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.app-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 14px;
+  backdrop-filter: blur(12px);
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-icon { font-size: 22px; }
+.logo-text  {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: white;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================
+   Icon Buttons (sound / background toggles)
+   ============================================================ */
+.icon-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: white;
+  border-radius: var(--radius-sm);
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition), transform 0.15s;
+  backdrop-filter: blur(8px);
+}
+.icon-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+
+/* ============================================================
+   Popup panels (sound / background)
+   ============================================================ */
+.sound-control,
+.bg-picker {
+  position: relative;
+}
+
+.sound-popup,
+.bg-popup {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: rgba(10, 10, 25, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  min-width: 220px;
+  z-index: 100;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.popup-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* --- Sound grid --- */
+.sound-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.sound-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+.sound-btn:hover { background: rgba(255,255,255,0.12); }
+.sound-btn.active {
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.15);
+}
+
+.sound-icon  { font-size: 20px; }
+.sound-label { font-size: 9px; color: var(--text-muted); }
+
+/* --- Volume row --- */
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.volume-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  outline: none;
+  cursor: pointer;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+/* --- Background grid --- */
+.bg-popup { min-width: 280px; }
+
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.bg-thumb-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 2px;
+  cursor: pointer;
+  transition: border-color var(--transition);
+  color: white;
+  font-family: inherit;
+}
+.bg-thumb-btn:hover { border-color: rgba(255,255,255,0.3); }
+.bg-thumb-btn.active { border-color: white; }
+
+.bg-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.bg-dark-thumb {
+  aspect-ratio: 16/9;
+  background: #111;
+}
+.bg-thumb-label { font-size: 9px; color: var(--text-muted); }
+
+/* ============================================================
+   Main Content
+   ============================================================ */
+.app-main {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20px 32px;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   Technique Selector Button
+   ============================================================ */
+.technique-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.technique-select-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: white;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+}
+.technique-select-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--accent, rgba(255,255,255,0.3));
+}
+
+.technique-dot-sm {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chevron { opacity: 0.6; font-size: 0.8em; margin-left: 2px; }
+
+.technique-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   Breathing Guide Container
+   ============================================================ */
+.guide-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Box Guide --- */
+.breathing-box-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.breathing-box-svg { display: block; overflow: visible; }
+
+.box-center-info {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.box-countdown {
+  font-size: 2.5rem;
+  font-weight: 200;
+  line-height: 1;
+  color: white;
+}
+.box-phase-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.7);
+  margin-top: 2px;
+}
+
+/* --- Circle Guide --- */
+.circle-guide-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   Phase Sequence Strip
+   ============================================================ */
+.phase-sequence {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.phase-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  transition: all 0.3s ease;
+  min-width: 70px;
+}
+.phase-chip.active {
+  background: color-mix(in srgb, var(--accent, #6366f1) 25%, transparent);
+  border-color: var(--accent, #6366f1);
+}
+
+.phase-chip-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.phase-chip.active .phase-chip-label { color: white; }
+
+.phase-chip-dur {
+  font-size: 1rem;
+  font-weight: 300;
+  color: white;
+  margin-top: 1px;
+}
+
+/* ============================================================
+   Session Timer
+   ============================================================ */
+.session-timer {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+.timer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.timer-value {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+.timer-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   Controls
+   ============================================================ */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primary-btn {
+  padding: 14px 40px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent, #6366f1);
+  color: white;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--accent, #6366f1) 50%, transparent);
+  transition: box-shadow 0.25s, background 0.25s;
+}
+.primary-btn:hover {
+  box-shadow: 0 6px 32px color-mix(in srgb, var(--accent, #6366f1) 60%, transparent);
+}
+
+.ghost-btn {
+  padding: 13px 22px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.ghost-btn:hover { background: rgba(255,255,255,0.14); }
+
+/* ============================================================
+   Description
+   ============================================================ */
+.technique-description {
+  max-width: 360px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Technique Selector Overlay
+   ============================================================ */
+.technique-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  padding: 0 0 env(safe-area-inset-bottom, 0);
+}
+
+.technique-panel {
+  background: rgba(10,10,25,0.97);
+  border-top: 1px solid var(--glass-border);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 8px 20px 32px;
+}
+
+/* On tablet+ show as a centered card */
+@media (min-width: 640px) {
+  .technique-overlay {
+    align-items: center;
+    padding: 20px;
+  }
+  .technique-panel {
+    border-radius: 24px;
+    max-height: 80vh;
+    border: 1px solid var(--glass-border);
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 8px;
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,25,0.97);
+  z-index: 1;
+}
+.panel-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+.close-btn {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background var(--transition);
+}
+.close-btn:hover { background: rgba(255,255,255,0.15); }
+
+.technique-category { margin-top: 16px; }
+
+.category-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.technique-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.technique-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  color: white;
+  transition: background var(--transition), border-color var(--transition);
+}
+.technique-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+.technique-card.selected {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent);
+}
+
+.technique-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.technique-info {
+  flex: 1;
+}
+.technique-info strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+}
+.technique-info p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.technique-timing {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+
+/* ============================================================
+   Responsive – Tablet (≥ 640px)
+   ============================================================ */
+@media (min-width: 640px) {
+  .app-header { padding: 20px 32px 16px; }
+  .app-main   { padding: 24px 32px 40px; gap: 20px; }
+  .logo-text  { font-size: 1.4rem; }
+  .primary-btn { padding: 15px 52px; font-size: 1.05rem; }
+
+  .technique-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
+/* ============================================================
+   Responsive – Desktop (≥ 1024px)
+   ============================================================ */
+@media (min-width: 1024px) {
+  .app-header { padding: 22px 48px 18px; }
+  .app-main   { gap: 24px; }
+
+  .sound-popup,
+  .bg-popup {
+    /* Ensure popups don't go off-screen on large displays */
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .bg-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ============================================================
+   Mobile tweaks (< 400px)
+   ============================================================ */
+@media (max-width: 399px) {
+  .logo-text  { display: none; }
+  .app-main   { gap: 12px; padding: 12px 14px 24px; }
+  .primary-btn { padding: 12px 32px; }
+
+  .sound-popup { min-width: 190px; }
+  .sound-grid  { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ============================================================
+   Scrollbar (webkit)
+   ============================================================ */
+::-webkit-scrollbar         { width: 5px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+/* Remove App.css defaults */
