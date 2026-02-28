@@ -410,16 +410,16 @@ export const techniques = [
 
 // ── Backgrounds ───────────────────────────────────────────────
 export const backgrounds = [
-  { id: 'waterfall', label: 'Waterfall',  url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=1920&q=80' },
   { id: 'sunset',    label: 'Sunset',     url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1920&q=80' },
+  { id: 'waterfall', label: 'Waterfall',  url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=1920&q=80' },
   { id: 'sunrise',   label: 'Sunrise',    url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80' },
   { id: 'mountain',  label: 'Mountain',   url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80' },
   { id: 'ocean',     label: 'Ocean',      url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920&q=80' },
   { id: 'waves',     label: 'Waves',      url: 'https://images.unsplash.com/photo-1505459668311-8dfac7952bf0?w=1920&q=80' },
   { id: 'ripples',   label: 'Ripples',    url: 'https://images.unsplash.com/photo-1468476396571-4d6f2a427ee7?w=1920&q=80' },
-  { id: 'stones',    label: 'Stones',     url: 'https://images.unsplash.com/photo-1543779064-5f4cc1b4df2f?w=1920&q=80' },
+  { id: 'stones',    label: 'Stones',     url: 'https://images.unsplash.com/photo-1763426294947-9ff31811820a?w=1920&q=80' },
   { id: 'forest',    label: 'Forest',     url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80' },
-  { id: 'stars',     label: 'Stars',      url: 'https://images.unsplash.com/photo-1475274047050-1d0c0975864c?w=1920&q=80' },
+  { id: 'stars',     label: 'Stars',      url: 'https://images.unsplash.com/photo-1742626157111-59f3f1019a8a?w=1920&q=80' },
   { id: 'none',      label: 'Dark',       url: null },
 ];
 
