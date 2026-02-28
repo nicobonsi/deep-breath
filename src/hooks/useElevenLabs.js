@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-const VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel – calm, clear American female
+const VOICE_ID = 'kLhAstPcnnPxqzk6gS5i'; // Rowan
 const MODEL_ID = 'eleven_turbo_v2';
 const LS_KEY   = 'deep-breath-el-key';
 
@@ -55,7 +55,7 @@ export function useElevenLabs() {
             voice_settings: {
               stability:        0.75,
               similarity_boost: 0.75,
-              speed:            0.88,
+              speed:            1.0,
               style:            0.15,
               use_speaker_boost: true,
             },
