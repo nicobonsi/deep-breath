@@ -131,22 +131,14 @@ export default function App() {
           />
         )}
 
-        {/* Session stats — breathing techniques only */}
-        <AnimatePresence>
-          {technique.guideType !== 'guided' && (breathing.isRunning || breathing.cycleCount > 0) && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-            >
-              <SessionTimer
-                totalTime={breathing.totalTime}
-                cycleCount={breathing.cycleCount}
-                technique={activeTechnique}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Session stats — always visible for breathing techniques so layout never jumps */}
+        {technique.guideType !== 'guided' && (
+          <SessionTimer
+            totalTime={breathing.totalTime}
+            cycleCount={breathing.cycleCount}
+            technique={activeTechnique}
+          />
+        )}
 
         {/* Controls */}
         <div className="controls">
