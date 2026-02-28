@@ -45,7 +45,9 @@ export function TechniqueSelector({ selected, onSelect, onClose }) {
                     <p>{t.description}</p>
                   </div>
                   <div className="technique-timing">
-                    {t.phases.map(p => p.duration).join('-')}s
+                    {t.duration
+                      ? t.duration
+                      : `${t.phases.map(p => p.duration).join('-')}s`}
                   </div>
                 </button>
               ))}

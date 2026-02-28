@@ -92,34 +92,37 @@ export default function App() {
           )}
         </div>
 
-        {/* Breathing visual */}
-        <div className="guide-container">
+        {/* Breathing / meditation visual */}
+        <div className={`guide-container ${technique.guideType === 'guided' ? 'guide-container--guided' : ''}`}>
           <BreathingGuide
             technique={technique}
             phase={breathing.phase}
             phaseIndex={breathing.phaseIndex}
             progress={breathing.progress}
             countdown={breathing.countdown}
+            isRunning={breathing.isRunning}
           />
         </div>
 
-        {/* Phase strip */}
-        <div className="phase-sequence">
-          {technique.phases.map((p, i) => (
-            <div
-              key={i}
-              className={`phase-chip ${i === breathing.phaseIndex && breathing.isRunning ? 'active' : ''}`}
-              style={{ '--accent': technique.color }}
-            >
-              <span className="phase-chip-label">{p.label}</span>
-              <span className="phase-chip-dur">{p.duration}s</span>
-            </div>
-          ))}
-        </div>
+        {/* Phase strip — hidden for guided meditations (the component handles its own progress) */}
+        {technique.guideType !== 'guided' && (
+          <div className="phase-sequence">
+            {technique.phases.map((p, i) => (
+              <div
+                key={i}
+                className={`phase-chip ${i === breathing.phaseIndex && breathing.isRunning ? 'active' : ''}`}
+                style={{ '--accent': technique.color }}
+              >
+                <span className="phase-chip-label">{p.label}</span>
+                <span className="phase-chip-dur">{p.duration}s</span>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* Session stats */}
+        {/* Session stats — only for breathing techniques */}
         <AnimatePresence>
-          {(breathing.isRunning || breathing.cycleCount > 0) && (
+          {technique.guideType !== 'guided' && (breathing.isRunning || breathing.cycleCount > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}

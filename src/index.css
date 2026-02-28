@@ -661,3 +661,162 @@ html, body, #root {
 ::-webkit-scrollbar-thumb   { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
 /* Remove App.css defaults */
+
+/* ============================================================
+   Guided Meditation Component
+   ============================================================ */
+
+/* Container — full-width for text-heavy layout */
+.guide-container--guided {
+  width: 100%;
+  max-width: 620px;
+}
+
+.guided-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  padding: 8px 0;
+  min-height: 260px;
+}
+
+/* Ambient orb — centred, behind text */
+.guided-orb-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.guided-orb {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  filter: blur(40px);
+  flex-shrink: 0;
+}
+
+/* Phase label */
+.guided-phase-label {
+  position: relative;
+  z-index: 1;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  opacity: 0.9;
+}
+
+/* Instruction text */
+.guided-instruction {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.guided-instruction p {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.93);
+  margin-bottom: 6px;
+}
+
+.guided-instruction p:last-child { margin-bottom: 0; }
+
+/* Progress bar + time */
+.guided-progress-area {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.guided-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.guided-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  min-width: 4px;
+}
+
+.guided-time-left {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* Dot breadcrumbs */
+.guided-dots {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 300px;
+}
+
+.guided-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* Technique card: show duration badge for guided techniques */
+.technique-timing--guided {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+/* ============================================================
+   Technique selector: show technique count in description
+   ============================================================ */
+@media (min-width: 640px) {
+  .guided-instruction p {
+    font-size: 1.15rem;
+  }
+
+  .guided-orb {
+    width: 360px;
+    height: 360px;
+  }
+}
+
+@media (max-width: 399px) {
+  .guided-instruction p {
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .guided-orb {
+    width: 200px;
+    height: 200px;
+    filter: blur(28px);
+  }
+}
