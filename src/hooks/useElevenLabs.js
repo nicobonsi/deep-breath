@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-const VOICE_ID = 'kLhAstPcnnPxqzk6gS5i'; // Rowan
+const VOICE_ID = 'onwK4e9ZLuTAKqWW03F9'; // Daniel – deep, calm British male (premade, free tier)
 const MODEL_ID = 'eleven_turbo_v2';
 const LS_KEY   = 'deep-breath-el-key';
 
