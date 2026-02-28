@@ -12,7 +12,19 @@ export function SoundControl({ activeSound, onSoundChange, volume, onVolumeChang
         title="Background Sound"
         aria-label="Sound settings"
       >
-        {activeSound?.icon ?? '🔇'}
+        {activeSound?.type === 'none' ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+            <line x1="23" y1="9" x2="17" y2="15" />
+            <line x1="17" y1="9" x2="23" y2="15" />
+          </svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+        )}
       </button>
 
       {open && (
@@ -33,7 +45,9 @@ export function SoundControl({ activeSound, onSoundChange, volume, onVolumeChang
           </div>
 
           <div className="volume-row">
-            <span>🔈</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, flexShrink: 0 }}>
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+            </svg>
             <input
               type="range"
               min={0}
@@ -44,7 +58,11 @@ export function SoundControl({ activeSound, onSoundChange, volume, onVolumeChang
               className="volume-slider"
               aria-label="Volume"
             />
-            <span>🔊</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, flexShrink: 0 }}>
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            </svg>
           </div>
         </div>
       )}
