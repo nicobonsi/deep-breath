@@ -163,20 +163,8 @@ export default function App() {
           )}
         </div>
 
-        {/* Description — idle only */}
-        <AnimatePresence mode="wait">
-          {!breathing.isRunning && (
-            <motion.p
-              key={technique.id}
-              className="technique-description"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-            >
-              {technique.description}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {/* Description — always visible */}
+        <p className="technique-description">{technique.description}</p>
 
       </main>
 
