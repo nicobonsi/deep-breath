@@ -66,6 +66,18 @@ export function useBreathing(technique) {
     }, 1000);
   }, [phases]);
 
+  const advancePhase = useCallback(() => {
+    const nextPhase = (phaseRef.current + 1) % phases.length;
+    if (nextPhase === 0) {
+      cycleRef.current += 1;
+      setCycleCount(cycleRef.current);
+    }
+    phaseRef.current = nextPhase;
+    setPhaseIndex(nextPhase);
+    countRef.current = phases[nextPhase].duration;
+    setCountdown(countRef.current);
+  }, [phases]);
+
   const pause = useCallback(() => {
     clearInterval(tickRef.current);
     setIsRunning(false);
@@ -97,5 +109,6 @@ export function useBreathing(technique) {
     reset,
     start,
     pause,
+    advancePhase,
   };
 }

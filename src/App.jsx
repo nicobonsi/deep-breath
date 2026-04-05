@@ -113,6 +113,7 @@ export default function App() {
             countdown={breathing.countdown}
             isRunning={breathing.isRunning}
             hasStarted={breathing.hasStarted}
+            advancePhase={breathing.advancePhase}
           />
         </div>
 

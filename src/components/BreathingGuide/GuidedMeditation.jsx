@@ -1,24 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGuidedAudio } from '../../hooks/useGuidedAudio';
 
-/**
- * GuidedMeditation – full-screen text-driven experience.
- *
- * Shows:
- *  • A softly pulsing ambient orb (colour from technique)
- *  • Phase label at the top
- *  • Instruction text, cross-fading between phases
- *  • A thin progress bar showing time remaining in current phase
- *  • Phase breadcrumb dots at the bottom
- *  • Optional voice narration toggle (pre-generated MP3s in public/audio/)
- */
-export function GuidedMeditation({ technique, phase, phaseIndex, progress, countdown, isRunning }) {
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const SWIPE_THRESHOLD = 50; // px
+
+export function GuidedMeditation({ technique, phase, phaseIndex, progress, countdown, isRunning, advancePhase }) {
   const color  = technique?.color ?? '#818cf8';
   const phases = technique?.phases ?? [];
   const total  = phases.length;
-
-  const SPEEDS = [0.5, 0.75, 1, 1.5, 2];
 
   const [speechEnabled, setSpeechEnabled] = useState(false);
   const { speak, stop, isSpeaking, error, speed, setSpeed } = useGuidedAudio();
@@ -30,8 +20,7 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
       return;
     }
     speak(technique.id, phaseIndex);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phaseIndex, speechEnabled, isRunning]);
+  }, [phaseIndex, speechEnabled, isRunning, speak, stop, technique.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSpeechToggle = () => {
     if (speechEnabled) {
@@ -42,6 +31,22 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
     }
   };
 
+  // ── Swipe to advance phase ─────────────────────────────────
+  const touchStartX = useRef(null);
+
+  const onTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const onTouchEnd = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (delta < -SWIPE_THRESHOLD && isRunning) {
+      advancePhase?.();
+    }
+  }, [isRunning, advancePhase]);
+
   // ── Format remaining time as m:ss ─────────────────────────
   const mins    = Math.floor(countdown / 60);
   const secs    = String(countdown % 60).padStart(2, '0');
@@ -50,7 +55,11 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
   const lines = (phase?.instruction ?? '').split('\n');
 
   return (
-    <div className="guided-wrapper">
+    <div
+      className="guided-wrapper"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
 
       {/* Ambient orb — breathes slowly always */}
       <div className="guided-orb-container" aria-hidden="true">
@@ -159,7 +168,7 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
                 onClick={() => setSpeed(s)}
                 title={`Playback speed ${s}×`}
               >
-                {s === 1 ? '1×' : `${s}×`}
+                {s}×
               </button>
             ))}
           </div>
