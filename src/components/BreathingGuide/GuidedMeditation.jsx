@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useElevenLabs } from '../../hooks/useElevenLabs';
+import { useGuidedAudio } from '../../hooks/useGuidedAudio';
 
 /**
  * GuidedMeditation – full-screen text-driven experience.
@@ -11,20 +11,17 @@ import { useElevenLabs } from '../../hooks/useElevenLabs';
  *  • Instruction text, cross-fading between phases
  *  • A thin progress bar showing time remaining in current phase
  *  • Phase breadcrumb dots at the bottom
- *  • Optional ElevenLabs voice narration toggle
+ *  • Optional voice narration toggle (pre-generated MP3s in public/audio/)
  */
 export function GuidedMeditation({ technique, phase, phaseIndex, progress, countdown, isRunning }) {
   const color  = technique?.color ?? '#818cf8';
   const phases = technique?.phases ?? [];
   const total  = phases.length;
 
-  // ── Speech state ──────────────────────────────────────────
-  const [speechEnabled, setSpeechEnabled] = useState(false);
-  const [showKeyInput,  setShowKeyInput]  = useState(false);
-  const [keyInput,      setKeyInput]      = useState('');
-  const keyInputRef = useRef(null);
+  const SPEEDS = [0.5, 0.75, 1, 1.5, 2];
 
-  const { speak, stop, isSpeaking, error, apiKey, saveApiKey } = useElevenLabs();
+  const [speechEnabled, setSpeechEnabled] = useState(false);
+  const { speak, stop, isSpeaking, error, speed, setSpeed } = useGuidedAudio();
 
   // Trigger narration when phase changes or speech is toggled
   useEffect(() => {
@@ -32,43 +29,16 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
       stop();
       return;
     }
-    if (phase?.instruction) {
-      speak(phase.instruction);
-    }
+    speak(technique.id, phaseIndex);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phaseIndex, speechEnabled, isRunning, speak, stop]);
-
-  // Auto-focus the key input when it appears
-  useEffect(() => {
-    if (showKeyInput) keyInputRef.current?.focus();
-  }, [showKeyInput]);
+  }, [phaseIndex, speechEnabled, isRunning]);
 
   const handleSpeechToggle = () => {
-    if (!speechEnabled) {
-      setSpeechEnabled(true);
-      if (!apiKey) {
-        setShowKeyInput(true);
-        setKeyInput('');
-      }
-    } else {
+    if (speechEnabled) {
       setSpeechEnabled(false);
-      setShowKeyInput(false);
       stop();
-    }
-  };
-
-  const handleSaveKey = () => {
-    if (keyInput.trim()) {
-      saveApiKey(keyInput.trim());
-      setShowKeyInput(false);
-    }
-  };
-
-  const handleKeyInputKeyDown = (e) => {
-    if (e.key === 'Enter')  handleSaveKey();
-    if (e.key === 'Escape') {
-      setShowKeyInput(false);
-      if (!apiKey) setSpeechEnabled(false);
+    } else {
+      setSpeechEnabled(true);
     }
   };
 
@@ -158,7 +128,7 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
         ))}
       </div>
 
-      {/* Voice narration toggle */}
+      {/* Voice narration toggle + speed control */}
       <div className="speech-row">
         <button
           className={`speech-toggle-btn${speechEnabled ? ' active' : ''}${isSpeaking ? ' speaking' : ''}`}
@@ -167,7 +137,6 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
           title={speechEnabled ? 'Disable voice narration' : 'Enable voice narration'}
           aria-pressed={speechEnabled}
         >
-          {/* Headphones icon */}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
             <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3v5z"/>
@@ -180,41 +149,26 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
             </span>
           )}
         </button>
-      </div>
 
-      {/* API key input */}
-      {(showKeyInput || (speechEnabled && !apiKey)) && (
-        <div className="speech-key-row">
-          <input
-            ref={keyInputRef}
-            type="password"
-            className="speech-key-input"
-            placeholder="ElevenLabs API key"
-            value={keyInput}
-            onChange={e => setKeyInput(e.target.value)}
-            onKeyDown={handleKeyInputKeyDown}
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <button
-            className="speech-key-save"
-            onClick={handleSaveKey}
-            disabled={!keyInput.trim()}
-          >
-            Save
-          </button>
-        </div>
-      )}
+        {speechEnabled && (
+          <div className="speech-speed" style={{ '--accent': color }}>
+            {SPEEDS.map(s => (
+              <button
+                key={s}
+                className={`speech-speed-btn${speed === s ? ' active' : ''}`}
+                onClick={() => setSpeed(s)}
+                title={`Playback speed ${s}×`}
+              >
+                {s === 1 ? '1×' : `${s}×`}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Error */}
       {error && speechEnabled && (
-        <p className="speech-error">
-          {error}
-          {' · '}
-          <button className="speech-error-link" onClick={() => { setShowKeyInput(true); setKeyInput(''); }}>
-            change key
-          </button>
-        </p>
+        <p className="speech-error">{error}</p>
       )}
 
     </div>
