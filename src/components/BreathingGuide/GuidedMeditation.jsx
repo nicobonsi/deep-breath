@@ -11,7 +11,7 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
   const total  = phases.length;
 
   const [speechEnabled, setSpeechEnabled] = useState(false);
-  const { speak, stop, isSpeaking, error, speed, setSpeed } = useGuidedAudio();
+  const { speak, stop, isSpeaking, error, speed, setSpeed } = useGuidedAudio(technique.id, total);
 
   // Trigger narration when phase changes or speech is toggled
   useEffect(() => {
@@ -19,8 +19,8 @@ export function GuidedMeditation({ technique, phase, phaseIndex, progress, count
       stop();
       return;
     }
-    speak(technique.id, phaseIndex);
-  }, [phaseIndex, speechEnabled, isRunning, speak, stop, technique.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    speak(phaseIndex);
+  }, [phaseIndex, speechEnabled, isRunning, speak, stop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSpeechToggle = () => {
     if (speechEnabled) {
