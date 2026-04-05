@@ -32,22 +32,23 @@ export function useGuidedAudio(techniqueId, phaseCount) {
     if (activeRef.current) activeRef.current.playbackRate = s;
   }, []);
 
-  const stop = useCallback(() => {
+  const clearActive = () => {
     if (activeRef.current) {
+      activeRef.current.onended = null;
+      activeRef.current.onerror = null;
       activeRef.current.pause();
       activeRef.current.currentTime = 0;
       activeRef.current = null;
     }
+  };
+
+  const stop = useCallback(() => {
+    clearActive();
     setIsSpeaking(false);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const speak = useCallback((phaseIndex) => {
-    // Stop whatever is currently playing
-    if (activeRef.current) {
-      activeRef.current.pause();
-      activeRef.current.currentTime = 0;
-      activeRef.current = null;
-    }
+    clearActive();
     setIsSpeaking(false);
     setError(null);
 
