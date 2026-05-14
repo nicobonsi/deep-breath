@@ -28,7 +28,7 @@ export function useBreathingCount(technique, displayCount, isRunning) {
   // Preload count-1.mp3 through count-8.mp3
   useEffect(() => {
     const pool = Array.from({ length: 8 }, (_, i) => {
-      const audio = new Audio(`/audio/count-${i + 1}.mp3`);
+      const audio = new Audio(`${import.meta.env.BASE_URL}audio/count-${i + 1}.mp3`);
       audio.preload = 'auto';
       return audio;
     });
