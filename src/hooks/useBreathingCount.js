@@ -9,6 +9,8 @@ const VOICE_COMBOS = {
   'belly':    [[4,6]],
 };
 
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5];
+
 function isSupported(technique) {
   if (!technique) return false;
   const combos = VOICE_COMBOS[technique.id];
@@ -20,8 +22,12 @@ function isSupported(technique) {
   );
 }
 
+export { SPEEDS };
+
 export function useBreathingCount(technique, displayCount, isRunning) {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [speed, setSpeedState] = useState(1);
+  const speedRef = useRef(1);
   const poolRef = useRef([]);
   const canUseVoice = isSupported(technique);
 
@@ -48,13 +54,19 @@ export function useBreathingCount(technique, displayCount, isRunning) {
     const audio = poolRef.current[displayCount - 1];
     if (!audio) return;
     audio.currentTime = 0;
+    audio.playbackRate = speedRef.current;
     audio.play().catch(() => {});
   }, [displayCount, voiceEnabled, isRunning, canUseVoice]);
+
+  const setSpeed = (s) => {
+    speedRef.current = s;
+    setSpeedState(s);
+  };
 
   const toggleVoice = () => {
     if (!canUseVoice) return;
     setVoiceEnabled(v => !v);
   };
 
-  return { voiceEnabled, toggleVoice, canUseVoice };
+  return { voiceEnabled, toggleVoice, canUseVoice, speed, setSpeed };
 }

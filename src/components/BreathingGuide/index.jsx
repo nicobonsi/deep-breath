@@ -1,9 +1,9 @@
 import { BoxGuide }           from './BoxGuide';
 import { CircleGuide }        from './CircleGuide';
 import { GuidedMeditation }   from './GuidedMeditation';
-import { useBreathingCount }  from '../../hooks/useBreathingCount';
+import { useBreathingCount, SPEEDS } from '../../hooks/useBreathingCount';
 
-function VoiceToggle({ color, voiceEnabled, toggleVoice, canUseVoice }) {
+function VoiceToggle({ color, voiceEnabled, toggleVoice, canUseVoice, speed, setSpeed }) {
   return (
     <div className="breathing-voice-row">
       <button
@@ -27,6 +27,21 @@ function VoiceToggle({ color, voiceEnabled, toggleVoice, canUseVoice }) {
         </svg>
         <span className="speech-toggle-label">Count</span>
       </button>
+
+      {voiceEnabled && (
+        <div className="speech-speed" style={{ '--accent': color }}>
+          {SPEEDS.map(s => (
+            <button
+              key={s}
+              className={`speech-speed-btn${speed === s ? ' active' : ''}`}
+              onClick={() => setSpeed(s)}
+              title={`Count speed ${s}×`}
+            >
+              {s}×
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -35,7 +50,7 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
   const color  = technique?.color  ?? '#6366f1';
   const phases = technique?.phases ?? [];
 
-  const { voiceEnabled, toggleVoice, canUseVoice } = useBreathingCount(
+  const { voiceEnabled, toggleVoice, canUseVoice, speed, setSpeed } = useBreathingCount(
     technique,
     displayCount,
     isRunning,
@@ -43,7 +58,7 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
 
   if (technique?.guideType === 'box') {
     return (
-      <>
+      <div className="breathing-guide-stack">
         <BoxGuide
           phaseIndex={phaseIndex}
           phase={phase}
@@ -58,8 +73,10 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
           voiceEnabled={voiceEnabled}
           toggleVoice={toggleVoice}
           canUseVoice={canUseVoice}
+          speed={speed}
+          setSpeed={setSpeed}
         />
-      </>
+      </div>
     );
   }
 
@@ -78,7 +95,7 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
   }
 
   return (
-    <>
+    <div className="breathing-guide-stack">
       <CircleGuide
         phase={phase}
         phaseIndex={phaseIndex}
@@ -94,7 +111,9 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
         voiceEnabled={voiceEnabled}
         toggleVoice={toggleVoice}
         canUseVoice={canUseVoice}
+        speed={speed}
+        setSpeed={setSpeed}
       />
-    </>
+    </div>
   );
 }

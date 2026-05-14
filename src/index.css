@@ -1109,11 +1109,19 @@ html, body, #root {
   color: rgba(255,255,255,0.45);
 }
 
+.breathing-guide-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .breathing-voice-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 2px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* Animated three-dot speaking indicator */
