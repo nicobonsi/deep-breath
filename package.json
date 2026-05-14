@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist",
     "generate-audio": "node scripts/generate-audio.js",
-    "generate-counting-audio": "node scripts/generate-counting-audio.js"
+    "generate-counting-audio": "node scripts/generate-counting-audio.js",
+    "generate-counting-audio-force": "node scripts/generate-counting-audio.js --force"
   },
   "homepage": "https://nicobonsi.github.io/deep-breath",
   "dependencies": {

@@ -52,7 +52,8 @@ export function BreathingGuide({ technique, phase, phaseIndex, progress, countdo
 
   const { voiceEnabled, toggleVoice, canUseVoice, speed, setSpeed } = useBreathingCount(
     technique,
-    displayCount,
+    phaseIndex,
+    phase,
     isRunning,
   );
 
