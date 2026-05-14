@@ -32,6 +32,7 @@ export function useBreathingCount(technique, phaseIndex, phase, isRunning) {
   const speedRef  = useRef(1);
   const poolRef   = useRef([]);
   const activeRef = useRef(null);
+  const timerRef  = useRef(null);
   const canUseVoice = isSupported(technique);
 
   // Preload count-seq-1.mp3 through count-seq-8.mp3
@@ -43,6 +44,7 @@ export function useBreathingCount(technique, phaseIndex, phase, isRunning) {
     });
     poolRef.current = pool;
     return () => {
+      clearTimeout(timerRef.current);
       pool.forEach(a => { a.pause(); a.src = ''; });
       poolRef.current = [];
       activeRef.current = null;
@@ -57,9 +59,11 @@ export function useBreathingCount(technique, phaseIndex, phase, isRunning) {
     }
   }, [canUseVoice]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Play the full sequence for this phase whenever the phase changes or session starts
+  // Play the full sequence for this phase whenever the phase changes or session starts.
+  // A short leading delay gives a natural breath before "one" is spoken.
   useEffect(() => {
     stopActive();
+    clearTimeout(timerRef.current);
     if (!voiceEnabled || !isRunning || !canUseVoice) return;
 
     const dur = phase?.duration;
@@ -68,10 +72,14 @@ export function useBreathingCount(technique, phaseIndex, phase, isRunning) {
     const audio = poolRef.current[dur - 1];
     if (!audio) return;
 
-    audio.currentTime  = 0;
-    audio.playbackRate = speedRef.current;
-    audio.play().catch(() => {});
-    activeRef.current = audio;
+    timerRef.current = setTimeout(() => {
+      audio.currentTime  = 0;
+      audio.playbackRate = speedRef.current;
+      audio.play().catch(() => {});
+      activeRef.current = audio;
+    }, 600);
+
+    return () => clearTimeout(timerRef.current);
   }, [phaseIndex, voiceEnabled, isRunning, canUseVoice]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Pause / resume audio with the session
