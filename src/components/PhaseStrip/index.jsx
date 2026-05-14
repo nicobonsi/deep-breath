@@ -112,9 +112,15 @@ export function PhaseStrip({ technique, phases, activeIndex, isRunning, hasStart
             duration={p.duration}
             defaultDuration={defaultPhases[i]?.duration ?? p.duration}
             isActive={i === activeIndex && (isRunning || hasStarted)}
-            canEdit={canEdit}
+            canEdit={canEdit && (!technique.linkedDurations || i === 0)}
             color={technique.color}
-            onSave={(val) => onSetDuration(technique.id, i, val)}
+            onSave={(val) => {
+              if (technique.linkedDurations) {
+                phases.forEach((_, j) => onSetDuration(technique.id, j, val));
+              } else {
+                onSetDuration(technique.id, i, val);
+              }
+            }}
           />
         ))}
       </div>

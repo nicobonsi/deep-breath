@@ -94,6 +94,12 @@ export function useBreathing(technique) {
     ? 1 - (countdown / currentPhase.duration)
     : 0;
 
+  // Count-up display: 1 → duration (for breathing visuals)
+  // countdown stays as-is for guided meditation time-remaining display
+  const displayCount = currentPhase.duration
+    ? currentPhase.duration - countdown + 1
+    : 1;
+
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
   return {
@@ -101,9 +107,10 @@ export function useBreathing(technique) {
     hasStarted,
     phase: currentPhase,
     phaseIndex,
-    countdown,
+    countdown,        // original countdown (guided meditation time remaining)
+    displayCount,     // count-up 1→duration (breathing guide display)
     cycleCount,
-    progress,       // 0 → 1 within current phase
+    progress,         // 0 → 1 within current phase
     totalTime: formatTime(totalSeconds),
     toggle,
     reset,

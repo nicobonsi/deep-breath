@@ -103,16 +103,30 @@ export function DurationEditor({ technique, durations, onSetDuration, onReset, i
       </div>
 
       <div className="dur-phases">
-        {technique.phases.map((phase, i) => (
+        {technique.linkedDurations ? (
+          // All phases share the same duration — show a single control
           <PhaseControl
-            key={i}
-            phase={phase}
-            defaultDuration={phase.duration}   // original default from techniques.js
-            current={durations[i]}
+            phase={technique.phases[0]}
+            defaultDuration={technique.phases[0].duration}
+            current={durations[0]}
             color={technique.color}
-            onChange={(delta) => onSetDuration(technique.id, i, durations[i] + delta)}
+            onChange={(delta) => {
+              const next = durations[0] + delta;
+              technique.phases.forEach((_, i) => onSetDuration(technique.id, i, next));
+            }}
           />
-        ))}
+        ) : (
+          technique.phases.map((phase, i) => (
+            <PhaseControl
+              key={i}
+              phase={phase}
+              defaultDuration={phase.duration}
+              current={durations[i]}
+              color={technique.color}
+              onChange={(delta) => onSetDuration(technique.id, i, durations[i] + delta)}
+            />
+          ))
+        )}
       </div>
     </motion.div>
   );

@@ -111,6 +111,7 @@ export default function App() {
             phaseIndex={breathing.phaseIndex}
             progress={breathing.progress}
             countdown={breathing.countdown}
+            displayCount={breathing.displayCount}
             isRunning={breathing.isRunning}
             hasStarted={breathing.hasStarted}
             advancePhase={breathing.advancePhase}

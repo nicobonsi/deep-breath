@@ -9,9 +9,11 @@ import { motion } from 'framer-motion';
  *  PAUSED  (hasStarted&&!isRunning) → ball frozen at the stepped-progress position
  */
 
-const SIZE   = 220;
-const BALL   = 18;
-const MARGIN = 22;
+const SIZE     = 220;
+const BALL     = 18;
+const MARGIN   = 22;
+const BALL_MIN = BALL / 2;       // 9  — resting radius
+const BALL_MAX = BALL / 2 * 4;   // 36 — fully-inhaled radius (4×)
 
 const corners = [
   { x: MARGIN,        y: MARGIN        }, // top-left     — inhale
@@ -52,6 +54,22 @@ export function BoxGuide({ phaseIndex, phase, color, countdown, isRunning, hasSt
     ballCy    = toCorner.y;
     animated  = true;
   }
+
+  // ── Compute ball radius based on phase ────────────────────
+  // sideIndex 0=inhale, 1=hold(full), 2=exhale, 3=hold(empty)
+  const initialR = sideIndex === 0 ? BALL_MIN
+                 : sideIndex === 1 ? BALL_MAX
+                 : sideIndex === 2 ? BALL_MAX
+                 :                   BALL_MIN;
+
+  const finalR   = sideIndex === 0 ? BALL_MAX
+                 : sideIndex === 1 ? BALL_MAX
+                 : sideIndex === 2 ? BALL_MIN
+                 :                   BALL_MIN;
+
+  // Radius for the static (paused/idle) rendering
+  const ballR = !hasStarted ? BALL_MIN
+              : initialR + (finalR - initialR) * progress;
 
   return (
     <div className="breathing-box-wrapper">
@@ -128,18 +146,18 @@ export function BoxGuide({ phaseIndex, phase, color, countdown, isRunning, hasSt
             key={`ball-${phaseIndex}`}
             cx={fromCorner.x}
             cy={fromCorner.y}
-            r={BALL / 2}
+            r={initialR}
             fill={color}
             filter="url(#boxGlow)"
-            initial={{ cx: fromCorner.x, cy: fromCorner.y }}
-            animate={{ cx: toCorner.x,   cy: toCorner.y   }}
+            initial={{ cx: fromCorner.x, cy: fromCorner.y, r: initialR }}
+            animate={{ cx: toCorner.x,   cy: toCorner.y,   r: finalR   }}
             transition={{ duration: dur, ease: 'linear' }}
           />
         ) : (
           <circle
             cx={ballCx}
             cy={ballCy}
-            r={BALL / 2}
+            r={ballR}
             fill={color}
             filter="url(#boxGlow)"
             opacity={hasStarted ? 1 : 0.55}

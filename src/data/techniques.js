@@ -18,6 +18,7 @@ export const techniques = [
     category: 'breathing',
     color: '#6366f1',
     guideType: 'box',
+    linkedDurations: true,   // all sides must be equal — changing one changes all
     phases: [
       { label: 'Inhale',  duration: 4, direction: 'up'    },
       { label: 'Hold',    duration: 4, direction: 'right'  },

@@ -32,9 +32,14 @@ export function useTechniqueSettings() {
   const getDurations = useCallback(
     (technique) => {
       const saved = stored[technique.id] ?? {};
-      return technique.phases.map((p, i) =>
+      const durations = technique.phases.map((p, i) =>
         saved[i] !== undefined ? saved[i] : p.duration
       );
+      // For linked techniques (e.g. box breathing) all phases must be equal — use phase 0
+      if (technique.linkedDurations) {
+        return durations.map(() => durations[0]);
+      }
+      return durations;
     },
     [stored]
   );

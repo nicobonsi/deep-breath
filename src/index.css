@@ -1100,6 +1100,22 @@ html, body, #root {
   color: white;
 }
 
+.speech-toggle-btn:disabled {
+  opacity: 0.22;
+  cursor: not-allowed;
+}
+.speech-toggle-btn:disabled:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.45);
+}
+
+.breathing-voice-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
 /* Animated three-dot speaking indicator */
 .speech-wave {
   display: flex;
