@@ -9,8 +9,6 @@ const VOICE_COMBOS = {
   'belly':    [[4,6]],
 };
 
-export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5];
-
 function isSupported(technique) {
   if (!technique) return false;
   const combos = VOICE_COMBOS[technique.id];
@@ -22,95 +20,105 @@ function isSupported(technique) {
   );
 }
 
-// Each file is a smooth single-take sequence: "one. two. three. four." etc.
-// Indexed by duration: pool[3] = count-seq-4.mp3 (counts 1→4)
-const SEQ_COUNT = 8;
+// Individual number recordings: count-1.mp3 ("one") … count-8.mp3 ("eight").
+// Each count is scheduled independently so audio stays locked to the 1s tick.
+const MAX_COUNT = 8;
 
-export function useBreathingCount(technique, phaseIndex, phase, isRunning) {
+export function useBreathingCount(technique, phaseIndex, phase, isRunning, countdown) {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [speed, setSpeedState]          = useState(1);
-  const speedRef  = useRef(1);
-  const poolRef   = useRef([]);
-  const activeRef = useRef(null);
-  const timerRef  = useRef(null);
+  const poolRef      = useRef([]);
+  const timersRef    = useRef([]);
+  const lastCountRef = useRef(0); // last count number that actually played this phase
+  const countdownRef = useRef(countdown);
   const canUseVoice = isSupported(technique);
 
-  // Preload count-seq-1.mp3 through count-seq-8.mp3
+  // Keep the latest countdown readable without re-running the scheduler.
+  // Declared before the scheduling effect so it syncs first on each commit.
+  useEffect(() => { countdownRef.current = countdown; }, [countdown]);
+
+  function clearTimers() {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }
+
+  function stopPlayback() {
+    clearTimers();
+    poolRef.current.forEach(a => {
+      if (!a.paused) { a.pause(); a.currentTime = 0; }
+    });
+  }
+
+  function scheduleCount(n, delay) {
+    const timer = setTimeout(() => {
+      const audio = poolRef.current[n - 1];
+      if (!audio) return;
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+      lastCountRef.current = n;
+    }, delay);
+    timersRef.current.push(timer);
+  }
+
+  // Preload count-1.mp3 through count-8.mp3
   useEffect(() => {
-    const pool = Array.from({ length: SEQ_COUNT }, (_, i) => {
-      const audio = new Audio(`${import.meta.env.BASE_URL}audio/count-seq-${i + 1}.mp3`);
+    const pool = Array.from({ length: MAX_COUNT }, (_, i) => {
+      const audio = new Audio(`${import.meta.env.BASE_URL}audio/count-${i + 1}.mp3`);
       audio.preload = 'auto';
       return audio;
     });
     poolRef.current = pool;
     return () => {
-      clearTimeout(timerRef.current);
+      clearTimers();
       pool.forEach(a => { a.pause(); a.src = ''; });
       poolRef.current = [];
-      activeRef.current = null;
     };
   }, []);
+
+  // A new phase starts its count history from scratch
+  useEffect(() => { lastCountRef.current = 0; }, [phaseIndex]);
 
   // Auto-disable when technique / durations no longer match a supported combo
   useEffect(() => {
     if (!canUseVoice) {
-      stopActive();
+      stopPlayback();
       setVoiceEnabled(false);
     }
   }, [canUseVoice]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Play the full sequence for this phase whenever the phase changes or session starts.
-  // A short leading delay gives a natural breath before "one" is spoken.
+  // Schedule one timer per count, aligned with the visual displayCount:
+  // count N fires at (N-1) * 1000ms from phase start. Runs on phase change,
+  // session start, and resume; cleanup cancels pending counts on pause/stop.
   useEffect(() => {
-    stopActive();
-    clearTimeout(timerRef.current);
+    stopPlayback();
     if (!voiceEnabled || !isRunning || !canUseVoice) return;
 
     const dur = phase?.duration;
-    if (!dur || dur < 1 || dur > SEQ_COUNT) return;
+    if (!dur || dur < 1 || dur > MAX_COUNT) return;
 
-    const audio = poolRef.current[dur - 1];
-    if (!audio) return;
-
-    timerRef.current = setTimeout(() => {
-      audio.currentTime  = 0;
-      audio.playbackRate = speedRef.current;
-      audio.play().catch(() => {});
-      activeRef.current = audio;
-    }, 600);
-
-    return () => clearTimeout(timerRef.current);
-  }, [phaseIndex, voiceEnabled, isRunning, canUseVoice]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Pause / resume audio with the session
-  useEffect(() => {
-    if (!activeRef.current) return;
-    if (isRunning) {
-      activeRef.current.play().catch(() => {});
+    // countdown === dur means the phase is (re)starting from the top.
+    // Otherwise we're resuming mid-phase: the count currently shown is
+    // dur - countdown + 1, and remaining counts tick every 1000ms.
+    const cd = countdownRef.current;
+    let firstCount = 1;
+    if (cd >= dur || cd == null) {
+      lastCountRef.current = 0;
     } else {
-      activeRef.current.pause();
+      firstCount = Math.min(Math.max(dur - cd + 1, 1), dur);
     }
-  }, [isRunning]);
 
-  function stopActive() {
-    if (activeRef.current) {
-      activeRef.current.pause();
-      activeRef.current.currentTime = 0;
-      activeRef.current = null;
+    for (let n = firstCount; n <= dur; n++) {
+      if (n <= lastCountRef.current) continue; // already played before pause
+      scheduleCount(n, (n - firstCount) * 1000);
     }
-  }
 
-  const setSpeed = (s) => {
-    speedRef.current = s;
-    setSpeedState(s);
-    if (activeRef.current) activeRef.current.playbackRate = s;
-  };
+    return stopPlayback;
+  }, [phaseIndex, voiceEnabled, isRunning, canUseVoice]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleVoice = () => {
     if (!canUseVoice) return;
-    if (voiceEnabled) { stopActive(); }
+    if (voiceEnabled) stopPlayback();
     setVoiceEnabled(v => !v);
   };
 
-  return { voiceEnabled, toggleVoice, canUseVoice, speed, setSpeed };
+  return { voiceEnabled, toggleVoice, canUseVoice };
 }
